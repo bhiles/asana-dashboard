@@ -1,4 +1,9 @@
 Asana::Application.routes.draw do
+
+  resource :dashboards
+
+  root :to => "dashboards#index"
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

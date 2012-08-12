@@ -11,6 +11,9 @@ group :development, :test do
   gem 'haml-rails'
   gem 'rspec-rails'
   gem 'factory_girl_rails'
+end
+
+group :test do
   gem 'vcr'
   gem 'webmock'
 end
