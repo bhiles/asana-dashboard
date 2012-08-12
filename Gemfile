@@ -5,11 +5,14 @@ gem 'jquery-rails'
 gem 'pg'
 gem 'haml'
 gem 'sass'
+gem 'rest-client'
 
 group :development, :test do
   gem 'haml-rails'
   gem 'rspec-rails'
   gem 'factory_girl_rails'
+  gem 'vcr'
+  gem 'webmock'
 end
 
 group :assets do

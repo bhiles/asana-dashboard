@@ -15,3 +15,5 @@
 /tmp
 
 .rvmrc
+config/authentication.yml
+spec/fixtures/vcr_cassettes
