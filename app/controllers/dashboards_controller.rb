@@ -1,5 +1,5 @@
 class DashboardsController < ApplicationController
   def index
-    @users = Api.new.users
+    @users = Api::User.all
   end
 end
