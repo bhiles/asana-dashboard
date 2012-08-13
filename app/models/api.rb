@@ -5,7 +5,7 @@ module Api
   class User
     include ActiveModel::MassAssignmentSecurity
 
-    attr_accessor :id, :name
+    attr_accessor :id, :name, :current_task
 
     def self.all
       url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/users"
@@ -20,8 +20,52 @@ module Api
       @name = attrs["name"]
     end
 
-    def tasks
-      # make some call using the id
+    def add_current_task!
+      Task.all(self).each do |task|
+        puts "task is #{task.inspect}"
+        if task.is_current?
+           self.current_task = task.name
+           break
+        end
+      end
     end
+
+  end
+
+  class Task
+    include ActiveModel::MassAssignmentSecurity
+
+    TODAY = "today"
+
+    attr_accessor :id, :name
+
+    def self.all(user)
+      url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/tasks?assignee=#{user.id}"
+      private_resource = RestClient::Resource.new url, CONFIG['api_key'], ''
+      response = private_resource.get
+      data = MultiJson.load(response)
+      data["data"].map{|u| self.new(u)}
+    end
+
+    def initialize(attrs)
+      @id = attrs["id"]
+      @name = attrs["name"]
+      @assignee_status = attrs["assignee_status"]
+    end
+
+    def is_current?
+      url = "https://app.asana.com/api/1.0/tasks/#{self.id}?opt_fields=name,assignee_status"
+      private_resource = RestClient::Resource.new url, CONFIG['api_key'], ''
+      response = private_resource.get
+      data = MultiJson.load(response)
+      puts "data is #{data.inspect}"
+      task = data["data"]
+      if TODAY == task["assignee_status"]
+        true
+      else
+        false
+      end
+    end
+
   end
 end

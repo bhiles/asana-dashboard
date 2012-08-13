@@ -3,3 +3,5 @@
 %ul
   - @users.each do |user|
     %li= user.name
+    %ul
+      %li= user.current_task

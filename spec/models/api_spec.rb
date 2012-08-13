@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-
 describe Api do
   it "includes bennett's user ID" do
     VCR.use_cassette('synopsis') do
