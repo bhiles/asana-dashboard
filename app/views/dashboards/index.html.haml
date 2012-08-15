@@ -1,14 +1,15 @@
-%h1
-  Asana Projects
-%h2= @project.name
-%ul
-  - @project.deliverables.each do |deliverable|
-    %li= deliverable.name
-    %ul
-      - deliverable.tasks.each do |task|
-        %li= task.name
-        - if !task.deliverable.nil?
-          %li= task.deliverable.man_hours
-          %ul
-            - task.deliverable.tasks.each do |subtask|
-              %li= subtask.name
+%div.container
+  %h1
+    Asana Projects
+  %h2= @project.name
+  %ul
+    - @project.deliverables.each do |deliverable|
+      %li= deliverable.name
+      %ul
+        - deliverable.tasks.each do |task|
+          %li= task.name
+          - if !task.deliverable.nil?
+            %li= "#{task.deliverable.man_hours} man hours"
+            %ul
+              - task.deliverable.tasks.each do |subtask|
+                %li= subtask.name
