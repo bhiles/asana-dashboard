@@ -3,11 +3,12 @@
 %h2= @project.name
 %ul
   - @project.deliverables.each do |deliverable|
-    %li.well= deliverable.name
+    %li= deliverable.name
     %ul
       - deliverable.tasks.each do |task|
         %li= task.name
-        %ul
-          - if !task.deliverable.nil?
+        - if !task.deliverable.nil?
+          %li= task.deliverable.man_hours
+          %ul
             - task.deliverable.tasks.each do |subtask|
               %li= subtask.name

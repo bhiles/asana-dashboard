@@ -65,12 +65,13 @@ module Api
   class Deliverable
     include ActiveModel::MassAssignmentSecurity
 
-    attr_accessor :id, :name, :tasks
+    attr_accessor :id, :name, :tasks, :man_hours
 
     def self.all_for_project_id(project_id)
       all_tasks = Task.all_for_project_id(project_id)
       deliverable = empty_deliverable
       tasks = []
+      man_hours = 0
       deliverables = []
       all_tasks.each do |single_task|
         if single_task.is_deliverable?
@@ -78,19 +79,23 @@ module Api
             deliverables << self.new(
                 {"id" => deliverable.id,
                   "name" => deliverable.name,
-                  "tasks" => tasks})
+                  "tasks" => tasks,
+                  "man_hours" => man_hours})
             tasks = []
+            man_hours = 0
           end
           deliverable = single_task
         else
           tasks << single_task
+          man_hours += single_task.hours
         end
       end
       if !tasks.empty?
         deliverables << self.new(
           {"id" => deliverable.id,
             "name" => deliverable.name,
-            "tasks" => tasks})
+            "tasks" => tasks,
+            "man_hours" => man_hours})
       end
       return deliverables
     end
@@ -99,6 +104,7 @@ module Api
       @id = attrs["id"]
       @name = attrs["name"]
       @tasks = attrs["tasks"]
+      @man_hours = attrs["man_hours"]
     end
 
 
@@ -127,7 +133,7 @@ module Api
     TODAY = "today"
     DELIVERABLE_SUFFIX = ":"
 
-    attr_accessor :id, :name, :notes, :deliverable
+    attr_accessor :id, :name, :notes, :deliverable, :hours
 
     def self.all(user)
       url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/tasks?assignee=#{user.id}"
@@ -149,6 +155,7 @@ module Api
       @id = attrs["id"]
       @name = attrs["name"]
       @notes = attrs["notes"]
+      @hours = Task.extract_hours(attrs["name"])
     end
 
     def is_current?
@@ -178,6 +185,23 @@ module Api
         self.deliverable = Deliverable.find_deliverable_and_tasks(project_id, deliverable_id)
         puts "deliverables is #{self.deliverable.inspect}"
       end
+    end
+
+    def self.extract_hours(text)
+      matches = /^{(\d*.?\d+)([dhm])}/.match(text)
+      if matches.nil?
+        return 0
+      end
+      quantity = matches[1].to_r
+      unit = matches[2]
+      if "h" == unit
+        conversion = 1
+      elsif "d" == unit
+        conversion = 24
+      else
+        conversion = 0
+      end
+      (quantity * conversion).to_i
     end
 
   end
