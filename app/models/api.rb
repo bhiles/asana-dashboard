@@ -52,6 +52,12 @@ module Api
 
     def add_deliverables!
       self.deliverables = Deliverable.all_for_project_id(self.id)
+      self.deliverables.each do |deliverable|
+        deliverable.tasks.each do |task|
+          task.extract_deliverable!
+          puts "Task is #{task.inspect}"
+        end
+      end
     end
 
   end
@@ -100,6 +106,19 @@ module Api
       self.new({"id" => 0, "name" => nil})
     end
 
+    def self.find_deliverable_and_tasks(project_id, deliverable_id)
+      project_deliverables = all_for_project_id(project_id)
+      #puts "Project Deliverables are #{project_deliverables.inspect}"
+      specific_deliverable = nil
+      project_deliverables.each do |deliverable|
+        puts "input id #{deliverable_id.inspect} vs obj id #{deliverable.id.inspect}"
+        if deliverable_id == deliverable.id
+          specific_deliverable = deliverable
+        end
+      end
+      return specific_deliverable
+    end
+
   end
 
   class Task
@@ -108,7 +127,7 @@ module Api
     TODAY = "today"
     DELIVERABLE_SUFFIX = ":"
 
-    attr_accessor :id, :name
+    attr_accessor :id, :name, :notes, :deliverable
 
     def self.all(user)
       url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/tasks?assignee=#{user.id}"
@@ -119,7 +138,7 @@ module Api
     end
 
     def self.all_for_project_id(project_id)
-      url = "https://app.asana.com/api/1.0/projects/#{project_id}/tasks"
+      url = "https://app.asana.com/api/1.0/projects/#{project_id}/tasks?opt_fields=name,notes"
       private_resource = RestClient::Resource.new url, CONFIG['api_key'], ''
       response = private_resource.get
       data = MultiJson.load(response)
@@ -129,7 +148,7 @@ module Api
     def initialize(attrs)
       @id = attrs["id"]
       @name = attrs["name"]
-      @assignee_status = attrs["assignee_status"]
+      @notes = attrs["notes"]
     end
 
     def is_current?
@@ -148,6 +167,17 @@ module Api
 
     def is_deliverable?
       DELIVERABLE_SUFFIX == self.name[-1]
+    end
+
+    def extract_deliverable!
+      matches = /https:\/\/app\.asana\.com\/0\/(\d+)\/(\d+)/.match(self.notes)
+      puts "matches are #{matches.inspect}"
+      if !matches.nil?
+        project_id = matches[1].to_i
+        deliverable_id = matches[2].to_i
+        self.deliverable = Deliverable.find_deliverable_and_tasks(project_id, deliverable_id)
+        puts "deliverables is #{self.deliverable.inspect}"
+      end
     end
 
   end
