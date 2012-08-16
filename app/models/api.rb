@@ -22,7 +22,6 @@ module Api
 
     def add_current_task!
       Task.all(self).each do |task|
-        puts "task is #{task.inspect}"
         if task.is_current?
            self.current_task = task.name
            break
