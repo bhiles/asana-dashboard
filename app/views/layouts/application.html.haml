@@ -1,13 +1,20 @@
 !!!
 %html
   %head
-    %title Asana
+    %title awe.sana
     = stylesheet_link_tag    "application"
     = javascript_include_tag "application"
     = csrf_meta_tags
   %body
     %p.notice= notice
     %p.alert= alert
+    %div.navbar
+      %div.navbar-inner
+        %div.container
+          %a.brand{:href => "#"} awe.sana
+          %ul.nav
+            %li
+              %a{:href => "#"} Current Tasks
     %div{:id => "content", :class => controller.controller_name}
       = yield
 

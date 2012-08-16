@@ -36,10 +36,10 @@ module Api
 
     TODAY = "today"
 
-    attr_accessor :id, :name, :assignee_status
+    attr_accessor :id, :name, :assignee_status, :completed
 
     def self.all(user)
-      url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/tasks?assignee=#{user.id}&opt_fields=name,assignee_status"
+      url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/tasks?assignee=#{user.id}&opt_fields=name,assignee_status,completed"
       private_resource = RestClient::Resource.new url, CONFIG['api_key'], ''
       response = private_resource.get
       data = MultiJson.load(response)
@@ -50,10 +50,11 @@ module Api
       @id = attrs["id"]
       @name = attrs["name"]
       @assignee_status = attrs["assignee_status"]
+      @completed = attrs["completed"]
     end
 
     def is_current?
-      if TODAY == self.assignee_status
+      if TODAY == self.assignee_status and FALSE == self.completed
         true
       else
         false
