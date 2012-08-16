@@ -3,7 +3,9 @@
     %div.row
       - user_row.each do |user|
         %div.span3
-          %dl
-            %dt= user.name
-            %dd is working on:
-            %dd= user.current_task
+          %ul.thumbnails
+            %li.span3
+              %div.thumbnail
+                %img{:src => user.profile_img_url, :alt => ""}
+                %h5= user.name
+                %p= user.current_task

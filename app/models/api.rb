@@ -5,7 +5,7 @@ module Api
   class User
     include ActiveModel::MassAssignmentSecurity
 
-    attr_accessor :id, :name, :current_task
+    attr_accessor :id, :name, :current_task, :profile_img_url
 
     def self.all
       url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/users"
@@ -18,6 +18,10 @@ module Api
     def initialize(attrs)
       @id = attrs["id"]
       @name = attrs["name"]
+      @profile_img_url = CONFIG["profile_img_urls"][@id]
+      if @profile_img_url.nil?
+        @profile_img_url = "http://placehold.it/260x180"
+      end
     end
 
     def add_current_task!
@@ -26,6 +30,9 @@ module Api
            self.current_task = task.name
            break
         end
+      end
+      if self.current_task.nil?
+        self.current_task = "NOTHING?!?"
       end
     end
 
