@@ -8,7 +8,7 @@ class DashboardsController < ApplicationController
     count = 0
     all_users.each_with_index do |user, index|
       user_row << user
-      if (index + 1) % 4 == 0
+      if (index + 1) % 5 == 0
         @user_rows << user_row
         user_row = []
       else

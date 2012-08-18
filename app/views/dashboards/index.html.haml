@@ -2,10 +2,10 @@
   - @user_rows.each do |user_row|
     %div.row
       - user_row.each do |user|
-        %div.span3
+        %div.span2
           %ul.thumbnails
-            %li.span3
+            %li.span2
               %div.thumbnail
-                %img{:src => user.profile_img_url, :alt => ""}
+                %img{:src => user.profile_img_url, :alt => "", :width => "160", :height => "120"}
                 %h5= user.name
                 %p= user.current_task
