@@ -7,6 +7,7 @@ gem 'haml'
 gem 'sass'
 gem 'rest-client'
 gem 'memcache-client'
+gem 'daemons'
 
 group :development, :test do
   gem 'haml-rails'
