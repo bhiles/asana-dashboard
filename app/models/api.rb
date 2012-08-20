@@ -2,6 +2,16 @@ module Api
 
   CONFIG=YAML.load(File.read(Rails.root.join("config","authentication.yml")))
 
+  def self.http_request(url)
+    unless output = CACHE.get(url)
+      private_resource = RestClient::Resource.new url, CONFIG['api_key'], ''
+      response = private_resource.get
+      output = MultiJson.load(response)
+      CACHE.set(url, output)
+    end
+    return output
+  end
+
   class User
     include ActiveModel::MassAssignmentSecurity
 
@@ -9,9 +19,7 @@ module Api
 
     def self.all
       url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/users"
-      private_resource = RestClient::Resource.new url, CONFIG['api_key'], ''
-      response = private_resource.get
-      data = MultiJson.load(response)
+      data = Api::http_request(url)
       data["data"].map{|u| self.new(u)}
     end
 
@@ -47,9 +55,7 @@ module Api
 
     def self.all(user)
       url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/tasks?assignee=#{user.id}&opt_fields=name,assignee_status,completed"
-      private_resource = RestClient::Resource.new url, CONFIG['api_key'], ''
-      response = private_resource.get
-      data = MultiJson.load(response)
+      data = Api::http_request(url)
       data["data"].map{|u| self.new(u)}
     end
 
