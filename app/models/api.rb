@@ -2,8 +2,8 @@ module Api
 
   CONFIG=YAML.load(File.read(Rails.root.join("config","authentication.yml")))
 
-  def self.http_request(url)
-    unless output = CACHE.get(url)
+  def self.http_request(url, overwrite_cache=false)
+    unless output = CACHE.get(url) and !overwrite_cache
       private_resource = RestClient::Resource.new url, CONFIG['api_key'], ''
       response = private_resource.get
       output = MultiJson.load(response)
@@ -17,9 +17,9 @@ module Api
 
     attr_accessor :id, :name, :current_task, :profile_img_url
 
-    def self.all
+    def self.all(overwrite_cache=false)
       url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/users"
-      data = Api::http_request(url)
+      data = Api::http_request(url, overwrite_cache)
       data["data"].map{|u| self.new(u)}
     end
 
@@ -32,8 +32,8 @@ module Api
       end
     end
 
-    def add_current_task!
-      Task.all(self).each do |task|
+    def add_current_task!(overwrite_cache=false)
+      Task.all(self, overwrite_cache).each do |task|
         if task.is_current?
            self.current_task = task.name
            break
@@ -53,9 +53,9 @@ module Api
 
     attr_accessor :id, :name, :assignee_status, :completed
 
-    def self.all(user)
+    def self.all(user, overwrite_cache=false)
       url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/tasks?assignee=#{user.id}&opt_fields=name,assignee_status,completed"
-      data = Api::http_request(url)
+      data = Api::http_request(url, overwrite_cache)
       data["data"].map{|u| self.new(u)}
     end
 

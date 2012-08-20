@@ -1,6 +1,7 @@
 require ENV["RAILS_ENV_PATH"]
 loop {
-  all_users = Api::User.all
-  all_users.each{|user| user.add_current_task!}
+  overwrite_cache = true
+  all_users = Api::User.all(overwrite_cache)
+  all_users.each{|user| user.add_current_task!(overwrite_cache)}
   sleep(10.minutes)
 }
