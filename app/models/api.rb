@@ -28,7 +28,7 @@ module Api
       @name = attrs["name"]
       @profile_img_url = CONFIG["profile_img_urls"][@id]
       if @profile_img_url.nil?
-        @profile_img_url = "http://placehold.it/260x180"
+        @profile_img_url = "http://placehold.it/160x120"
       end
     end
 
