@@ -11,10 +11,12 @@
     %div.navbar
       %div.navbar-inner
         %div.container
-          %a.brand{:href => "#"} awe.sana
+          %a.brand{:href => "/"} awe.sana
           %ul.nav
             %li
-              %a{:href => "#"} Current Tasks
+              %a{:href => "/"} Current
+            %li
+              %a{:href => "/todays"} Completed
     %div{:id => "content", :class => controller.controller_name}
       = yield
 
