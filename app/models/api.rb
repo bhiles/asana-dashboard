@@ -43,7 +43,6 @@ module Api
         self.current_task = "NOTHING?!?"
       end
     end
-
   end
 
   class Task
@@ -51,10 +50,10 @@ module Api
 
     TODAY = "today"
 
-    attr_accessor :id, :name, :assignee_status, :completed
+    attr_accessor :id, :name, :assignee_status, :completed, :completed_at
 
     def self.all(user, overwrite_cache=false)
-      url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/tasks?assignee=#{user.id}&opt_fields=name,assignee_status,completed"
+      url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/tasks?assignee=#{user.id}&opt_fields=name,assignee_status,completed,completed_at"
       data = Api::http_request(url, overwrite_cache)
       data["data"].map{|u| self.new(u)}
     end
@@ -64,6 +63,7 @@ module Api
       @name = attrs["name"]
       @assignee_status = attrs["assignee_status"]
       @completed = attrs["completed"]
+      @completed_at = attrs["completed_at"]
     end
 
     def is_current?
@@ -72,6 +72,43 @@ module Api
       else
         false
       end
+    end
+
+    def extract_date
+      Date.strptime(self.completed_at, '%Y-%m-%d').to_s
+    end
+
+    def self.fetch_grouped_by_completion_date(users, overwrite_cache=false)
+      grouped_tasks = {}
+      users.each do |user|
+        self.all(user, overwrite_cache).each do |task|
+          if !task.completed_at.nil?
+            date = task.extract_date
+            grouped_task = grouped_tasks[date]
+            if grouped_task.nil?
+              grouped_tasks[date] = {user.name => [task]}
+            else
+              user_tasks = grouped_task[user.name]
+              if user_tasks.nil?
+                grouped_task[user.name] = [task]
+              else
+                user_tasks << task
+              end
+            end
+          end
+        end
+      end
+
+      ordered_tasks = []
+      (0..256).each do |num_days|
+        date = num_days.day.ago.strftime('%Y-%m-%d')
+        grouped_task = grouped_tasks[date]
+        if !grouped_task.nil?
+          ordered_tasks << {date => grouped_task}
+        end
+      end
+
+      return ordered_tasks
     end
 
   end

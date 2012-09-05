@@ -1,0 +1,10 @@
+%div.container
+  - @date_user_tasks.each do |date_user_task|
+    - date_user_task.each do |date, user_tasks|
+      %h3= date
+      %ul
+        - user_tasks.each do |user_name, tasks|
+          %h5= user_name
+          %ul
+            - tasks.each do |task|
+              %li= task.name
