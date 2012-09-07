@@ -4,6 +4,7 @@ Asana::Application.routes.draw do
 
   root :to => "dashboards#index"
   match "todays" => "todays#index"
+  match "sprint" => "sprint#index"
 
   # The priority is based upon order of creation:
   # first created -> highest priority.

@@ -1,0 +1,11 @@
+%div.container
+  %h3= "Sprint for #{@sprint_date}"
+  %ul
+    - @users_tasks.each do |user_name, tasks|
+      %h5= user_name
+      %ul
+        - tasks.each do |task|
+          %li
+            #{task.name} is 
+            %span.label= "#{task.completed_status}"
+

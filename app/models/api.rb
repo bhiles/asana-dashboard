@@ -50,10 +50,10 @@ module Api
 
     TODAY = "today"
 
-    attr_accessor :id, :name, :assignee_status, :completed, :completed_at
+    attr_accessor :id, :name, :assignee_status, :completed, :completed_at, :due_on
 
     def self.all(user, overwrite_cache=false)
-      url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/tasks?assignee=#{user.id}&opt_fields=name,assignee_status,completed,completed_at"
+      url = "https://app.asana.com/api/1.0/workspaces/#{CONFIG['workspace_id']}/tasks?assignee=#{user.id}&opt_fields=name,assignee_status,completed,completed_at,due_on"
       data = Api::http_request(url, overwrite_cache)
       data["data"].map{|u| self.new(u)}
     end
@@ -64,6 +64,7 @@ module Api
       @assignee_status = attrs["assignee_status"]
       @completed = attrs["completed"]
       @completed_at = attrs["completed_at"]
+      @due_on = attrs["due_on"]
     end
 
     def is_current?
@@ -76,6 +77,10 @@ module Api
 
     def extract_date
       Date.strptime(self.completed_at, '%Y-%m-%d').to_s
+    end
+
+    def completed_status
+      self.completed ? "completed" : "in progress"
     end
 
     def self.fetch_grouped_by_completion_date(users, overwrite_cache=false)
@@ -111,5 +116,27 @@ module Api
       return ordered_tasks
     end
 
+    def self.this_friday
+      (DateTime.now.end_of_week - 2).strftime('%Y-%m-%d')
+    end
+
+    def self.fetch_sprint_user_tasks(users, overwrite_cache=false)
+      sprint_date = self.this_friday
+      users_tasks = {}
+      users.each do |user|
+        self.all(user, overwrite_cache).each do |task|
+          if sprint_date == task.due_on
+            user_tasks = users_tasks[user.name]
+            if user_tasks.nil?
+              users_tasks[user.name] = [task]
+            else
+              user_tasks << task
+            end
+          end
+        end
+      end
+
+      return users_tasks
+    end
   end
 end
