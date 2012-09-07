@@ -40,7 +40,7 @@ module Api
         end
       end
       if self.current_task.nil?
-        self.current_task = "NOTHING?!?"
+        self.current_task = ""
       end
     end
   end
